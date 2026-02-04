@@ -1,0 +1,95 @@
+2026-02-02 11:29:49,175 - __main__ - INFO - === Application Started ===
+2026-02-02 11:29:49,175 - __main__ - INFO - Ensured directory exists: E:\0_AI\welding_gun_manager\resources
+2026-02-02 11:29:49,176 - __main__ - INFO - Ensured directory exists: E:\0_AI\welding_gun_manager\resources\images
+2026-02-02 11:29:49,177 - __main__ - INFO - Ensured directory exists: E:\0_AI\welding_gun_manager\resources\models
+2026-02-02 11:29:49,177 - __main__ - INFO - Ensured directory exists: E:\0_AI\welding_gun_manager\resources\documents
+2026-02-02 11:29:49,177 - __main__ - INFO - Ensured directory exists: E:\0_AI\welding_gun_manager\resources\presets
+2026-02-02 11:33:18,159 - __main__ - INFO - === Application Started ===
+2026-02-02 11:33:18,160 - __main__ - INFO - Ensured directory exists: E:\0_AI\welding_gun_manager\resources
+2026-02-02 11:33:18,160 - __main__ - INFO - Ensured directory exists: E:\0_AI\welding_gun_manager\resources\images
+2026-02-02 11:33:18,160 - __main__ - INFO - Ensured directory exists: E:\0_AI\welding_gun_manager\resources\models
+2026-02-02 11:33:18,160 - __main__ - INFO - Ensured directory exists: E:\0_AI\welding_gun_manager\resources\documents
+2026-02-02 11:33:18,160 - __main__ - INFO - Ensured directory exists: E:\0_AI\welding_gun_manager\resources\presets
+2026-02-02 11:33:18,170 - models.database - INFO - [DATABASE] Tables initialized at E:\0_AI\welding_gun_manager\welding_guns.db
+2026-02-02 11:33:18,170 - __main__ - INFO - Database initialized.
+2026-02-02 11:33:18,170 - __main__ - INFO - Starting GUI application...
+2026-02-02 11:40:09,769 - __main__ - INFO - === Application Started ===
+2026-02-02 11:40:09,770 - __main__ - INFO - Ensured directory exists: E:\0_AI\welding_gun_manager\resources
+2026-02-02 11:40:09,770 - __main__ - INFO - Ensured directory exists: E:\0_AI\welding_gun_manager\resources\images
+2026-02-02 11:40:09,770 - __main__ - INFO - Ensured directory exists: E:\0_AI\welding_gun_manager\resources\models
+2026-02-02 11:40:09,770 - __main__ - INFO - Ensured directory exists: E:\0_AI\welding_gun_manager\resources\documents
+2026-02-02 11:40:09,770 - __main__ - INFO - Ensured directory exists: E:\0_AI\welding_gun_manager\resources\presets
+2026-02-02 11:40:09,771 - models.database - INFO - [DATABASE] Tables (welding_guns, change_log) initialized at E:\0_AI\welding_gun_manager\welding_guns.db
+2026-02-02 11:40:09,771 - models.database - INFO - [DATABASE] Tables (welding_guns, change_log) initialized at E:\0_AI\welding_gun_manager\welding_guns.db
+2026-02-02 11:40:09,771 - __main__ - INFO - Database initialized.
+2026-02-02 11:40:09,771 - __main__ - INFO - Starting GUI application...
+2026-02-02 11:40:09,817 - models.database - INFO - [DATABASE] Tables (welding_guns, change_log) initialized at E:\0_AI\welding_gun_manager\welding_guns.db
+2026-02-02 12:42:34,812 - __main__ - INFO - === Application Started ===
+2026-02-02 12:42:34,813 - __main__ - INFO - Ensured directory exists: E:\0_AI\welding_gun_manager\resources
+2026-02-02 12:42:34,814 - __main__ - INFO - Ensured directory exists: E:\0_AI\welding_gun_manager\resources\images
+2026-02-02 12:42:34,815 - __main__ - INFO - Ensured directory exists: E:\0_AI\welding_gun_manager\resources\models
+2026-02-02 12:42:34,815 - __main__ - INFO - Ensured directory exists: E:\0_AI\welding_gun_manager\resources\documents
+2026-02-02 12:42:34,815 - __main__ - INFO - Ensured directory exists: E:\0_AI\welding_gun_manager\resources\presets
+2026-02-02 12:42:34,816 - models.database - INFO - [DATABASE] Tables (welding_guns, change_log) initialized at E:\0_AI\welding_gun_manager\welding_guns.db
+2026-02-02 12:42:34,816 - models.database - INFO - [DATABASE] Tables (welding_guns, change_log) initialized at E:\0_AI\welding_gun_manager\welding_guns.db
+2026-02-02 12:42:34,816 - __main__ - INFO - Database initialized.
+2026-02-02 12:42:34,817 - __main__ - INFO - Starting GUI application...
+2026-02-02 12:42:34,850 - models.database - INFO - [DATABASE] Tables (welding_guns, change_log) initialized at E:\0_AI\welding_gun_manager\welding_guns.db
+2026-02-02 12:44:26,313 - __main__ - INFO - === Application Started ===
+2026-02-02 12:44:26,313 - __main__ - INFO - Ensured directory exists: E:\0_AI\welding_gun_manager\resources
+2026-02-02 12:44:26,313 - __main__ - INFO - Ensured directory exists: E:\0_AI\welding_gun_manager\resources\images
+2026-02-02 12:44:26,313 - __main__ - INFO - Ensured directory exists: E:\0_AI\welding_gun_manager\resources\models
+2026-02-02 12:44:26,314 - __main__ - INFO - Ensured directory exists: E:\0_AI\welding_gun_manager\resources\documents
+2026-02-02 12:44:26,314 - __main__ - INFO - Ensured directory exists: E:\0_AI\welding_gun_manager\resources\presets
+2026-02-02 12:44:26,314 - models.database - INFO - [DATABASE] Tables (welding_guns, change_log) initialized at E:\0_AI\welding_gun_manager\welding_guns.db
+2026-02-02 12:44:26,314 - models.database - INFO - [DATABASE] Tables (welding_guns, change_log) initialized at E:\0_AI\welding_gun_manager\welding_guns.db
+2026-02-02 12:44:26,314 - __main__ - INFO - Database initialized.
+2026-02-02 12:44:26,315 - __main__ - INFO - Starting GUI application...
+2026-02-02 12:44:26,348 - models.database - INFO - [DATABASE] Tables (welding_guns, change_log) initialized at E:\0_AI\welding_gun_manager\welding_guns.db
+2026-02-02 12:51:11,705 - __main__ - INFO - === Application Started ===
+2026-02-02 12:51:11,705 - __main__ - INFO - Ensured directory exists: E:\0_AI\welding_gun_manager\resources
+2026-02-02 12:51:11,705 - __main__ - INFO - Ensured directory exists: E:\0_AI\welding_gun_manager\resources\images
+2026-02-02 12:51:11,706 - __main__ - INFO - Ensured directory exists: E:\0_AI\welding_gun_manager\resources\models
+2026-02-02 12:51:11,706 - __main__ - INFO - Ensured directory exists: E:\0_AI\welding_gun_manager\resources\documents
+2026-02-02 12:51:11,707 - __main__ - INFO - Ensured directory exists: E:\0_AI\welding_gun_manager\resources\presets
+2026-02-02 12:51:11,708 - models.database - INFO - [DATABASE] Tables (welding_guns, change_log) initialized at E:\0_AI\welding_gun_manager\welding_guns.db
+2026-02-02 12:51:11,708 - models.database - INFO - [DATABASE] Tables (welding_guns, change_log) initialized at E:\0_AI\welding_gun_manager\welding_guns.db
+2026-02-02 12:51:11,708 - __main__ - INFO - Database initialized.
+2026-02-02 12:51:11,708 - __main__ - INFO - Starting GUI application...
+2026-02-02 12:51:11,743 - models.database - INFO - [DATABASE] Tables (welding_guns, change_log) initialized at E:\0_AI\welding_gun_manager\welding_guns.db
+2026-02-02 12:51:48,968 - __main__ - INFO - === Application Started ===
+2026-02-02 12:51:48,968 - __main__ - INFO - Ensured directory exists: E:\0_AI\welding_gun_manager\resources
+2026-02-02 12:51:48,968 - __main__ - INFO - Ensured directory exists: E:\0_AI\welding_gun_manager\resources\images
+2026-02-02 12:51:48,968 - __main__ - INFO - Ensured directory exists: E:\0_AI\welding_gun_manager\resources\models
+2026-02-02 12:51:48,968 - __main__ - INFO - Ensured directory exists: E:\0_AI\welding_gun_manager\resources\documents
+2026-02-02 12:51:48,968 - __main__ - INFO - Ensured directory exists: E:\0_AI\welding_gun_manager\resources\presets
+2026-02-02 12:51:48,969 - models.database - INFO - [DATABASE] Tables (welding_guns, change_log) initialized at E:\0_AI\welding_gun_manager\welding_guns.db
+2026-02-02 12:51:48,969 - models.database - INFO - [DATABASE] Tables (welding_guns, change_log) initialized at E:\0_AI\welding_gun_manager\welding_guns.db
+2026-02-02 12:51:48,969 - __main__ - INFO - Database initialized.
+2026-02-02 12:51:48,969 - __main__ - INFO - Starting GUI application...
+2026-02-02 12:51:49,004 - models.database - INFO - [DATABASE] Tables (welding_guns, change_log) initialized at E:\0_AI\welding_gun_manager\welding_guns.db
+2026-02-02 12:56:34,094 - __main__ - INFO - === Application Started ===
+2026-02-02 12:56:34,095 - __main__ - INFO - Ensured directory exists: E:\0_AI\welding_gun_manager\resources
+2026-02-02 12:56:34,095 - __main__ - INFO - Ensured directory exists: E:\0_AI\welding_gun_manager\resources\images
+2026-02-02 12:56:34,095 - __main__ - INFO - Ensured directory exists: E:\0_AI\welding_gun_manager\resources\models
+2026-02-02 12:56:34,095 - __main__ - INFO - Ensured directory exists: E:\0_AI\welding_gun_manager\resources\documents
+2026-02-02 12:56:34,095 - __main__ - INFO - Ensured directory exists: E:\0_AI\welding_gun_manager\resources\presets
+2026-02-02 12:56:34,095 - models.database - INFO - [DATABASE] Tables (welding_guns, change_log) initialized at E:\0_AI\welding_gun_manager\welding_guns.db
+2026-02-02 12:56:34,096 - models.database - INFO - [DATABASE] Tables (welding_guns, change_log) initialized at E:\0_AI\welding_gun_manager\welding_guns.db
+2026-02-02 12:56:34,096 - __main__ - INFO - Database initialized.
+2026-02-02 12:56:34,096 - __main__ - INFO - Starting GUI application...
+2026-02-02 12:56:34,133 - models.database - INFO - [DATABASE] Tables (welding_guns, change_log) initialized at E:\0_AI\welding_gun_manager\welding_guns.db
+2026-02-02 12:56:34,147 - __main__ - INFO - GUI main loop started.
+2026-02-02 12:56:38,974 - __main__ - INFO - GUI main loop ended. Application shutting down.
+2026-02-02 17:20:43,901 - __main__ - INFO - 应用程序启动成功
+2026-02-02 17:46:25,893 - __main__ - INFO - 应用程序启动成功
+2026-02-02 17:46:51,598 - __main__ - INFO - 应用程序启动成功
+2026-02-02 17:47:18,419 - __main__ - INFO - 应用程序启动成功
+2026-02-02 17:47:29,271 - __main__ - INFO - 应用程序启动成功
+2026-02-02 17:48:42,833 - __main__ - INFO - 应用程序启动成功
+2026-02-02 17:51:22,402 - __main__ - INFO - 应用程序启动成功
+2026-02-02 17:55:18,489 - __main__ - INFO - 应用程序启动成功
+2026-02-02 17:55:30,356 - __main__ - INFO - 应用程序启动成功
+2026-02-02 17:55:45,364 - __main__ - INFO - 应用程序启动成功
+2026-02-02 17:55:56,147 - __main__ - INFO - 应用程序启动成功
+2026-02-02 17:57:41,837 - __main__ - INFO - 应用程序启动成功

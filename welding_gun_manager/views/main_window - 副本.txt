@@ -1,0 +1,516 @@
+# views/main_window.py
+"""
+主窗口视图
+显示焊枪列表，并提供添加新焊枪的入口。
+"""
+
+from views.login_window import LoginWindow
+import tkinter as tk
+from tkinter import ttk, messagebox
+import logging
+from controllers.gun_controller import GunController
+from controllers.preset_controller import PresetController
+from controllers.gun_controller import GunController
+from controllers.preset_controller import PresetController
+from views.detail_window import DetailWindow  # 导入详情窗口
+from models.entities import WeldingGun # 导入实体类，用于创建空对象
+
+class MainWindow:
+    """应用程序的主窗口。"""
+    def __init__(self, root):
+        self.root = root
+        self.logger = logging.getLogger(__name__)
+        
+        # ====== 【关键】1. 初始化所有Tkinter变量（必须在setup_ui前！）======
+        self.search_var = tk.StringVar()  # 搜索框变量
+    
+        # 筛选条件变量（带默认值"全部"）
+        self.filter_vars = {
+            "manufacturers": tk.StringVar(value="全部"),
+            "gun_types": tk.StringVar(value="全部"),
+            "lines": tk.StringVar(value="全部"),
+            "areas": tk.StringVar(value="全部")
+        }
+        
+        # 占位声明（setup_ui中会填充）
+        self.filter_combos = {}  # 筛选下拉框引用字典
+        self.tree = None         # 表格引用
+        
+        # ====== 2. 用户权限系统（默认administrator）======
+        self.current_user = "administrator"
+        self.user_role = "readonly"
+        self.user_desc = "只读用户"
+        
+        # ====== 3. 初始化控制器 ======
+        from controllers.gun_controller import GunController
+        from controllers.preset_controller import PresetController
+        self.controller = GunController()
+        self.preset_controller = PresetController()
+        
+        # ====== 4. 创建UI（此时所有变量已存在）======
+        self.setup_ui()
+        self._apply_permissions()
+        
+        # ====== 5. 窗口配置 ======
+        self.root.title("焊枪管理系统 - 主页")
+        self.root.geometry("900x600")
+        self.root.protocol("WM_DELETE_WINDOW", self._on_closing)
+        
+    def setup_ui(self):
+        """设置主窗口的用户界面。"""
+        # ====== 1. 顶部区域：搜索框 + 用户状态栏（同行布局）======
+        top_frame = ttk.Frame(self.root)
+        top_frame.pack(fill=tk.X, padx=10, pady=5)
+    
+        # 搜索区域（左侧）
+        search_subframe = ttk.Frame(top_frame)
+        search_subframe.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        ttk.Label(search_subframe, text="搜索 (名称/编号):").pack(side=tk.LEFT, padx=(0, 5))
+        search_entry = ttk.Entry(
+            search_subframe,
+            textvariable=self.search_var,
+            width=30
+        )
+        search_entry = ttk.Entry(
+            search_subframe,
+            textvariable=self.search_var,  # ✅ 此时已存在
+            width=30
+        )
+        search_entry.bind('<KeyRelease>', lambda e: self.refresh_display())
+    
+        # 用户状态栏（右侧）
+        user_bar = ttk.Frame(top_frame)
+        user_bar.pack(side=tk.RIGHT, padx=(10, 0))
+        self.user_label = ttk.Label(
+            user_bar,
+            text=f"👤 {self.current_user} ({self.user_desc})",
+            font=("Arial", 9, "bold"),
+            foreground="blue" if self.user_role == "admin" else "gray"
+        )
+        self.user_label.pack(side=tk.LEFT)
+        ttk.Button(
+            user_bar,
+            text="切换用户",
+            command=self._switch_user,
+            style="Accent.TButton"
+        ).pack(side=tk.LEFT, padx=(5, 0))
+        
+        # ====== 2. 筛选区域（关键：必须在此处创建并填充filter_combos）======
+        filter_frame = ttk.Frame(self.root)
+        filter_frame.pack(fill=tk.X, padx=10, pady=(0, 5))
+        
+        # 【加固】显式初始化字典（避免残留）
+        self.filter_combos = {}
+        
+        # 创建四个筛选下拉框
+        filter_configs = [
+            ("品牌", "manufacturers"),
+            ("枪型", "gun_types"),
+            ("产线", "lines"),
+            ("区域", "areas")
+        ]
+        
+        for label_text, key in filter_configs:
+            frame = ttk.Frame(filter_frame)
+            frame.pack(side=tk.LEFT, padx=5)
+            ttk.Label(frame, text=f"{label_text}:").pack(side=tk.LEFT)
+            combo = ttk.Combobox(
+                frame,
+                textvariable=self.filter_vars[key],
+                width=12,
+                state="readonly"  # 防止手动输入无效值
+            )
+            combo.pack(side=tk.LEFT)
+            self.filter_combos[key] = combo  # ← 立即填充字典！
+        
+        # ====== 3. 表格区域 ======
+        tree_frame = ttk.Frame(self.root)
+        tree_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=(0, 5))
+        
+        columns = ("id", "name", "manufacturer", "gun_type", "line", "area", "status")
+        self.tree = ttk.Treeview(
+            tree_frame,
+            columns=columns,
+            show="headings",
+            selectmode="browse"
+        )
+        
+        # 列配置
+        col_names = {
+            "id": "ID", "name": "名称", "manufacturer": "品牌", "gun_type": "枪型",
+            "line": "产线", "area": "区域", "status": "状态"
+        }
+        col_widths = {"id": 50, "name": 150, "status": 80}
+        
+        for col in columns:
+            self.tree.heading(col, text=col_names[col])
+            self.tree.column(col, width=col_widths.get(col, 100), anchor=tk.CENTER)
+        
+        # 滚动条
+        vsb = ttk.Scrollbar(tree_frame, orient="vertical", command=self.tree.yview)
+        hsb = ttk.Scrollbar(tree_frame, orient="horizontal", command=self.tree.xview)
+        self.tree.configure(yscrollcommand=vsb.set, xscrollcommand=hsb.set)
+        
+        self.tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        vsb.pack(side=tk.RIGHT, fill=tk.Y)
+        hsb.pack(side=tk.BOTTOM, fill=tk.X)
+        
+        # ====== 4. 【关键】此时调用load_presets（filter_combos已填充）======
+        self.load_presets()
+            
+            # ====== 【新增】权限控制核心方法 ======
+        def _switch_user(self):
+            """弹出登录窗口切换用户"""
+            LoginWindow(self.root, self._on_user_login)
+        
+        def _on_user_login(self, user_id, role, desc):
+            """登录成功回调：更新用户状态并刷新UI"""
+            self.current_user = user_id
+            self.user_role = role
+            self.user_desc = desc
+            self.user_label.config(
+                text=f"👤 {user_id} ({desc})",
+                foreground="blue" if role == "admin" else "gray"
+            )
+            self._apply_permissions()
+            self.logger.info(f"用户切换: {user_id} ({role})")
+        
+        def _apply_permissions(self):
+            """根据权限动态控制UI元素"""
+            # 1. 安全绑定表格事件（仅当tree存在时）
+            if hasattr(self, 'tree') and self.tree:
+                if self.user_role == "readonly":
+                    self.tree.unbind('<Double-1>')
+                    self.tree.bind('<Double-1>', lambda e: self._show_readonly_tip())
+                else:
+                    self.tree.unbind('<Double-1>')
+                    self.tree.bind('<Double-1>', self._on_double_click)
+        
+            # 2. 安全刷新显示（仅当refresh_display存在且tree已初始化）
+            if hasattr(self, 'refresh_display') and hasattr(self, 'tree') and self.tree:
+                try:
+                    self.refresh_display()
+                except Exception as e:
+                    self.logger.warning(f"权限应用时刷新失败: {e}")
+        
+            # 3. 【可选】禁用操作按钮（后续补充按钮引用后启用）
+            # if hasattr(self, 'add_btn'): self.add_btn.config(state='normal' if self.user_role=='admin' else 'disabled')
+            # 1. 表格双击事件：只读用户禁用编辑
+            if hasattr(self, 'tree') and self.tree:
+                if self.user_role == "readonly":
+                    self.tree.unbind('<Double-1>')  # 移除双击编辑
+                    self.tree.bind('<Double-1>', lambda e: self._show_readonly_tip())
+                else:
+                    self.tree.bind('<Double-1>', self._on_double_click)  # 恢复编辑
+            
+            # 2. 禁用/启用操作按钮（需在setup_ui中保存按钮引用）
+            # 示例：假设你有 self.add_btn, self.del_btn 等
+            # if hasattr(self, 'add_btn'): self.add_btn.config(state='normal' if self.user_role=='admin' else 'disabled')
+            
+            # 3. 刷新显示（确保筛选等逻辑不受影响）
+            if hasattr(self, 'refresh_display'):
+                self.refresh_display()
+        
+        def _show_readonly_tip(self):
+            """只读用户尝试编辑时的提示"""
+            from tkinter import messagebox
+            messagebox.showinfo("权限提示", "当前用户无编辑权限！\n请切换至 system 账户（密码: manager）进行操作。", parent=self.root)
+        
+        # ====== 【增强】原有双击事件（增加权限检查）======
+        def _on_double_click(self, event):
+            """表格双击事件（安全入口）"""
+            if self.user_role == "readonly":
+                self._show_readonly_tip()
+                return
+            # ... [原有打开DetailWindow的逻辑] ...
+            
+            ttk.Button(
+                user_bar, 
+                text="切换用户", 
+                command=self._switch_user,
+                style="Accent.TButton"  # 可选：添加醒目样式
+            ).pack(side=tk.LEFT)
+            
+            ttk.Label(self.search_frame, text="搜索 (名称/编号):").pack(side=tk.LEFT, padx=(0, 5))
+            search_entry = ttk.Entry(
+                self.search_frame, 
+                textvariable=self.search_var,  # ✅ 使用__init__中已初始化的变量
+                width=30
+            )
+            search_entry.pack(side=tk.LEFT, padx=(0, 10), fill=tk.X, expand=True)
+            search_entry.bind('<KeyRelease>', lambda event: self.refresh_display())
+            
+            # --- 筛选区域（示例：品牌筛选）---
+            filter_frame = ttk.Frame(self.root)
+            filter_frame.pack(pady=5, padx=10, fill=tk.X)
+            
+            # 创建筛选下拉框（关键：保存引用到self.filter_combos）
+            for label, key in [("品牌", "manufacturers"), ("枪型", "gun_types"), 
+                            ("产线", "lines"), ("区域", "areas")]:
+                frame = ttk.Frame(filter_frame)
+                frame.pack(side=tk.LEFT, padx=5)
+                ttk.Label(frame, text=f"{label}:").pack(side=tk.LEFT)
+                combo = ttk.Combobox(frame, textvariable=self.filter_vars[key], width=12)
+                combo.pack(side=tk.LEFT)
+                self.filter_combos[key] = combo  # ✅ 保存引用（供load_presets更新）
+            
+            # --- 表格区域（后续实现）---
+            # tree_frame = ... 
+            # self.tree = ttk.Treeview(...)
+            
+            # --- 初始化预设数据（关键！）---
+            self.load_presets()  # 确保下拉框有数据
+        
+        def load_presets(self):
+            """加载预设数据到筛选下拉框"""
+            # 从PresetController获取预设
+            self.presets = self.preset_controller.get_all_presets()
+            
+            # 更新所有筛选下拉框
+            for key, combo in self.filter_combos.items():
+                options = ["全部"] + self.presets.get(key, [])
+                combo['values'] = options
+                # 保持当前选中值（若存在）
+                current = self.filter_vars[key].get()
+                if current in options:
+                    combo.set(current)
+
+            # 筛选下拉菜单
+            # --- 修正: 使用 filter_vars 的键 ---
+            for key, var in self.filter_vars.items():
+                # 映射键名到显示文本
+                display_name_map = {
+                    'manufacturers': '品牌',
+                    'gun_types': '类型',
+                    'lines': '线体',
+                    'areas': '区域',
+                }
+                display_name = display_name_map.get(key, key.capitalize()) # 如果没找到映射，就用首字母大写
+
+                ttk.Label(self.search_frame, text=f"{display_name}:").pack(side=tk.LEFT, padx=(10, 5))
+                combo = ttk.Combobox(self.search_frame, textvariable=var, state="readonly", width=12)
+                combo['values'] = ('全部',) # 初始值
+                combo.pack(side=tk.LEFT, padx=(0, 10))
+                combo.bind('<<ComboboxSelected>>', lambda event: self.refresh_display())
+                # --- 存储 Combobox 引用 ---
+                self.filter_combos[key] = combo
+
+            # --- 按钮区域 ---
+            button_frame = ttk.Frame(self.root)
+            button_frame.pack(pady=5, padx=10, fill=tk.X)
+
+            ttk.Button(button_frame, text="添加新焊枪", command=self.open_add_window).pack(side=tk.LEFT, padx=(0, 5))
+            ttk.Button(button_frame, text="刷新列表", command=self.refresh_display).pack(side=tk.LEFT, padx=(0, 5))
+
+            # --- 表格区域 ---
+            columns = ("ID", "名称", "品牌", "类型", "线体", "区域", "机器人号")
+            self.tree = ttk.Treeview(self.root, columns=columns, show='headings', height=15)
+
+            # 定义列标题和宽度
+            column_widths = {
+                "ID": 50, "名称": 150, "品牌": 100, "类型": 120, "线体": 80, "区域": 100, "机器人号": 80
+            }
+            for col in columns:
+                self.tree.heading(col, text=col)
+                self.tree.column(col, width=column_widths.get(col, 100), anchor=tk.W)
+
+            # 添加滚动条
+            tree_scroll_y = ttk.Scrollbar(self.root, orient=tk.VERTICAL, command=self.tree.yview)
+            tree_scroll_x = ttk.Scrollbar(self.root, orient=tk.HORIZONTAL, command=self.tree.xview)
+            self.tree.configure(yscrollcommand=tree_scroll_y.set, xscrollcommand=tree_scroll_x.set)
+
+            self.tree.pack(pady=10, padx=10, fill=tk.BOTH, expand=True)
+            tree_scroll_y.pack(side=tk.RIGHT, fill=tk.Y)
+            tree_scroll_x.pack(side=tk.BOTTOM, fill=tk.X)
+
+            # 绑定双击事件以编辑
+            self.tree.bind("<Double-1>", self.on_item_double_click)
+
+            # 初始加载数据
+            self.load_presets()
+            self.refresh_display()
+
+        def load_presets(self):
+            """从控制器加载所有预设选项，用于筛选下拉菜单。"""
+            self.presets = PresetController.get_all_presets()
+            # --- 修正: 遍历 filter_combos，而不是 presets ---
+            # 这样可以确保只更新存在的 Combobox
+            for key, combo_widget in self.filter_combos.items():
+                # 获取与当前 Combobox 对应的预设值
+                values = self.presets.get(key, []) # 使用 .get() 避免 KeyError
+                if values:
+                    combo_widget['values'] = ('全部',) + tuple(sorted(values, key=str.lower))
+                else:
+                    combo_widget['values'] = ('全部',) # 如果没有预设值，只显示“全部”
+
+        def refresh_display(self):
+            """刷新表格显示，应用搜索和筛选条件。"""
+            # 清空当前表格内容
+            for item in self.tree.get_children():
+                self.tree.delete(item)
+
+            # 获取搜索和筛选条件
+            search_term = self.search_var.get().strip().lower()
+            filters = {}
+            for key, var in self.filter_vars.items():
+                val = var.get()
+                if val != "全部":
+                    filters[key] = val # 使用正确的键名 (manufacturers, gun_types, etc.)
+
+            # 从控制器获取数据
+            all_guns = self.controller.load_all_guns()
+
+            # 应用搜索和筛选
+            filtered_guns = []
+            for gun in all_guns:
+                # --- 修正: 使用正确的属性名进行筛选 ---
+                # 这里假设 WeldingGun 实体类有对应的属性
+                # 例如: gun.manufacturer 对应 filters['manufacturers']
+                # 需要确保 WeldingGun 实体和数据库字段一致
+                match_search = not search_term or search_term in gun.name.lower() or search_term in gun.gun_number.lower()
+                
+                match_filters = True
+                for filter_key, filter_value in filters.items():
+                    # 映射 filter_key 到 WeldingGun 的属性名
+                    # 例如 'manufacturers' -> 'manufacturer'
+                    attr_name_map = {
+                        'manufacturers': 'manufacturer',
+                        'gun_types': 'gun_type',
+                        'lines': 'line',
+                        'areas': 'area',
+                    }
+                    gun_attr_name = attr_name_map.get(filter_key)
+                    
+                    if gun_attr_name:
+                        gun_attr_value = getattr(gun, gun_attr_name, None)
+                        if gun_attr_value != filter_value:
+                            match_filters = False
+                            break
+                if match_search and match_filters:
+                    filtered_guns.append(gun)
+
+            # 插入数据到表格
+            for gun in filtered_guns:
+                # --- 修正: 使用正确的属性名填充表格 ---
+                # 例如: gun.manufacturer 对应表格的 "品牌" 列
+                self.tree.insert('', tk.END, values=(
+                    gun.id, gun.name, gun.manufacturer, gun.gun_type, # 使用 manufacturer, gun_type
+                    gun.line, gun.area, gun.robot_number
+                ))
+
+        def open_add_window(self):
+            """打开添加新焊枪的详情窗口。"""
+            # 创建一个空的 WeldingGun 对象作为初始数据
+            initial_data = WeldingGun()
+            # initial_data.presets = self.presets # 如果 detail_window 需要，可以通过构造函数传递
+            detail_window = DetailWindow(tk.Toplevel(self.root), self.controller, initial_data, mode='add', presets=self.presets)
+            # 可以选择等待窗口关闭后再刷新主列表
+            # detail_window.window.wait_window() # 这会让主线程阻塞
+            # self.refresh_display() # 窗口关闭后刷新
+            # 或者，在 DetailWindow 内部成功保存后发送信号给主窗口刷新，更推荐
+
+        def on_item_double_click(self, event):
+            """处理表格项双击事件，打开编辑窗口。"""
+            selected_item = self.tree.selection()
+            if not selected_item:
+                return
+
+            item_values = self.tree.item(selected_item, 'values')
+            if not item_values:
+                return
+
+            gun_id = int(item_values[0]) # ID 是第一个值
+            gun_to_edit = self.controller.get_gun_by_id(gun_id)
+            if gun_to_edit:
+                detail_window = DetailWindow(tk.Toplevel(self.root), self.controller, gun_to_edit, mode='edit', presets=self.presets)
+                # 同样，可以在保存后刷新主列表
+        def _on_double_click(self, event):
+            """双击表格行（权限检查已在_apply_permissions中处理）"""
+            if not self.tree.selection():
+                return
+            # 后续实现：获取选中项 → 打开DetailWindow编辑
+            self.logger.info("双击事件触发（待实现DetailWindow）")
+
+        def _show_readonly_tip(self):
+            """只读用户提示"""
+            from tkinter import messagebox
+            messagebox.showinfo(
+                "权限提示", 
+                "当前用户无编辑权限！\n请切换至 system 账户（密码: manager）进行操作。",
+                parent=self.root
+            )
+        # views/main_window.py - 补充缺失方法（防崩溃）
+        
+        def _switch_user(self):
+            """弹出登录窗口切换用户"""
+            from views.login_window import LoginWindow
+            LoginWindow(self.root, self._on_user_login)
+
+        def _on_user_login(self, user_id, role, desc):
+            """登录成功回调"""
+            self.current_user = user_id
+            self.user_role = role
+            self.user_desc = desc
+            self.user_label.config(
+                text=f"👤 {user_id} ({desc})",
+                foreground="blue" if role == "admin" else "gray"
+            )
+            self._apply_permissions()
+            self.logger.info(f"用户切换: {user_id} ({role})")
+
+        def refresh_display(self):
+            """刷新表格显示（空实现防崩溃，后续补充）"""
+            if not hasattr(self, 'tree') or not self.tree:
+                return
+            # TODO: 后续实现：根据搜索/筛选条件加载数据
+            for item in self.tree.get_children():
+                self.tree.delete(item)
+            # 示例：添加空提示行
+            self.tree.insert("", "end", values=("", "暂无数据", "", "", "", "", ""))
+            
+            # ====== 【权限系统核心方法 - 必须缩进在类内】======
+            def _switch_user(self):
+                from views.login_window import LoginWindow
+                LoginWindow(self.root, self._on_user_login)
+
+            def _on_user_login(self, user_id, role, desc):
+                self.current_user = user_id
+                self.user_role = role
+                self.user_desc = desc
+                self.user_label.config(
+                    text=f"👤 {user_id} ({desc})",
+                    foreground="blue" if role == "admin" else "gray"
+                )
+                self._apply_permissions()
+                self.logger.info(f"用户切换: {user_id} ({role})")
+
+            def _apply_permissions(self):
+                if hasattr(self, 'tree') and self.tree:
+                    self.tree.unbind('<Double-1>')
+                    if self.user_role == "readonly":
+                        self.tree.bind('<Double-1>', lambda e: self._show_readonly_tip())
+                    else:
+                        self.tree.bind('<Double-1>', self._on_double_click)
+                if hasattr(self, 'refresh_display'):
+                    self.refresh_display()
+
+            def _show_readonly_tip(self):
+                from tkinter import messagebox
+                messagebox.showinfo("权限提示", "当前用户无编辑权限！\n请切换至 system 账户（密码: manager）进行操作。", parent=self.root)
+
+            def _on_double_click(self, event):
+                if self.tree.selection():
+                    self.logger.info("双击事件触发（DetailWindow待实现）")
+
+            def refresh_display(self):
+                if not (hasattr(self, 'tree') and self.tree):
+                    return
+                for item in self.tree.get_children():
+                    self.tree.delete(item)
+                self.tree.insert("", "end", values=("", "● 系统就绪：点击'切换用户'登录 system 账户进行操作 ●", "", "", "", "", ""))
+                    
+# --- 示例用法 ---
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = MainWindow(root)
+    root.mainloop()

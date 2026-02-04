@@ -1,0 +1,18 @@
+{
+  "weld_type": "钢点焊",
+  "gun_brand": "小原",
+  "gun_number": "GUN-00999",
+  "gun_model": "C型",
+  "throat_depth": "500",
+  "throat_width": "200",
+  "max_stroke": "150",
+  "max_pressure": "4.5",
+  "motor_brand": "库卡",
+  "cap_spec": "R30",
+  "cap_tilt": "否",
+  "static_tilt_angle": "0",
+  "dynamic_tilt_angle": "0",
+  "name": "小原_GUN-00999",
+  "created_at": "2026-02-04T11:14:37.174702",
+  "folder_name": "小原_GUN-00999_20260204_111437"
+}
